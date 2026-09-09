@@ -10,6 +10,9 @@ const formValidation = [
   body('age').isInt({ min: 1, max: 120 }).withMessage('Valid Age / വയസ്സ് is required'),
   body('gender').isIn(['Male', 'Female']).withMessage('Select Gender / ലിംഗഭേദം'),
   body('attendeesCount').isInt({ min: 1 }).withMessage('Number of Attendees / പങ്കെടുക്കുന്നവരുടെ എണ്ണം is required'),
+  body('whatsappNumber').trim().notEmpty().withMessage('WhatsApp number / വാട്സ്ആപ്പ് നമ്പർ is required'),
+  body('whatsappNumber').matches(/^\+?[0-9\s()-]{10,20}$/).withMessage('Enter a valid WhatsApp number'),
+  body('whatsappCommunityConcern').isIn(['Yes', 'No']).withMessage('Select Yes or No / അതെ അല്ലെങ്കിൽ ഇല്ല തിരഞ്ഞെടുക്കുക'),
 ];
 
 // POST /api/registrations - Submit response
@@ -21,6 +24,8 @@ router.post('/', formValidation, async (req, res) => {
 
   try {
     const { fullName, place, age, gender, attendeesCount } = req.body;
+    const whatsappNumber = String(req.body.whatsappNumber ?? req.body.whatsappNo ?? '').trim();
+    const whatsappCommunityConcern = req.body.whatsappCommunityConcern ?? req.body.communityConcern ?? '';
 
     const registration = new Registration({
       fullName,
@@ -28,6 +33,8 @@ router.post('/', formValidation, async (req, res) => {
       age: parseInt(age, 10),
       gender,
       attendeesCount: parseInt(attendeesCount, 10) || 1,
+      whatsappNumber,
+      whatsappCommunityConcern,
     });
 
     await registration.save();

@@ -27,6 +27,17 @@ const registrationSchema = new mongoose.Schema(
       min: 1,
       default: 1,
     },
+    whatsappNumber: {
+      type: String,
+      required: [true, 'WhatsApp number / വാട്സ്ആപ്പ് നമ്പർ is required'],
+      trim: true,
+    },
+    whatsappCommunityConcern: {
+      type: String,
+      required: [true, 'WhatsApp community response / വാട്സ്ആപ്പ് കമ്മ്യൂണിറ്റി പ്രതികരണം is required'],
+      enum: ['Yes', 'No'],
+      trim: true,
+    },
     registrationId: {
       type: String,
       unique: true,
