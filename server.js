@@ -27,6 +27,14 @@ app.use(
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
+app.get('/', (req, res) => {
+  res.status(200).json({
+    message: "Welcome to Ishq Majlis Server API",
+    healthCheck: "/api/health",
+    ping: "/ping"
+  });
+});
+
 // ─── API Routes ───────────────────────────────────────────────────────────────
 app.use('/api/registrations', registrationsRouter);
 
