@@ -14,7 +14,12 @@ const registrationSchema = new mongoose.Schema(
     },
     age: {
       type: Number,
-      required: [true, 'Age / വയസ്സ് is required'],
+      required: false,
+    },
+    hasAboveThreeYears: {
+      type: String,
+      enum: ['Yes', 'No'],
+      default: 'No',
     },
     gender: {
       type: String,
@@ -49,8 +54,24 @@ const registrationSchema = new mongoose.Schema(
 // Auto-generate unique registration ID for pass (e.g. IM-2026-0001)
 registrationSchema.pre('save', async function () {
   if (!this.registrationId) {
-    const count = await mongoose.model('Registration').countDocuments();
-    this.registrationId = `IM-2026-${String(count + 1).padStart(4, '0')}`;
+    const latest = await mongoose
+      .model('Registration')
+      .findOne({ registrationId: /^IM-2026-\d+$/ })
+      .sort({ registrationId: -1 });
+
+    let nextNum = 1;
+    if (latest && latest.registrationId) {
+      const match = latest.registrationId.match(/\d+$/);
+      if (match) {
+        nextNum = parseInt(match[0], 10) + 1;
+      }
+    }
+
+    while (await mongoose.model('Registration').exists({ registrationId: `IM-2026-${String(nextNum).padStart(4, '0')}` })) {
+      nextNum++;
+    }
+
+    this.registrationId = `IM-2026-${String(nextNum).padStart(4, '0')}`;
   }
 });
 

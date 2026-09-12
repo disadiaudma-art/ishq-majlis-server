@@ -7,9 +7,10 @@ const Registration = require('../models/Registration');
 const formValidation = [
   body('fullName').trim().notEmpty().withMessage('Full Name / പേര് is required'),
   body('place').trim().notEmpty().withMessage('Place / സ്ഥലം is required'),
-  body('age').isInt({ min: 1, max: 120 }).withMessage('Valid Age / വയസ്സ് is required'),
+  
+  body('hasAboveThreeYears').optional().isIn(['Yes', 'No']).withMessage('Select Yes or No / അതെ അല്ലെങ്കിൽ ഇല്ല തിരഞ്ഞെടുക്കുക'),
   body('gender').isIn(['Male', 'Female']).withMessage('Select Gender / ലിംഗഭേദം'),
-  body('attendeesCount').isInt({ min: 1 }).withMessage('Number of Attendees / പങ്കെടുക്കുന്നവരുടെ എണ്ണം is required'),
+  body('attendeesCount').optional({ values: 'falsy' }).isInt({ min: 1 }).withMessage('Number of Attendees / പങ്കെടുക്കുന്നവരുടെ എണ്ണം is required'),
   body('whatsappNumber').trim().notEmpty().withMessage('WhatsApp number / വാട്സ്ആപ്പ് നമ്പർ is required'),
   body('whatsappNumber').matches(/^\+?[0-9\s()-]{10,20}$/).withMessage('Enter a valid WhatsApp number'),
   body('whatsappCommunityConcern').isIn(['Yes', 'No']).withMessage('Select Yes or No / അതെ അല്ലെങ്കിൽ ഇല്ല തിരഞ്ഞെടുക്കുക'),
@@ -23,16 +24,20 @@ router.post('/', formValidation, async (req, res) => {
   }
 
   try {
-    const { fullName, place, age, gender, attendeesCount } = req.body;
+    const { fullName, place, age, gender, hasAboveThreeYears } = req.body;
+    const attendeesCount = hasAboveThreeYears === 'No'
+      ? 1
+      : (parseInt(req.body.attendeesCount, 10) || 1);
     const whatsappNumber = String(req.body.whatsappNumber ?? req.body.whatsappNo ?? '').trim();
     const whatsappCommunityConcern = req.body.whatsappCommunityConcern ?? req.body.communityConcern ?? '';
 
     const registration = new Registration({
       fullName,
       place,
-      age: parseInt(age, 10),
+      age: age ? parseInt(age, 10) : undefined,
+      hasAboveThreeYears: hasAboveThreeYears || (age ? (Number(age) > 3 ? 'Yes' : 'No') : 'No'),
       gender,
-      attendeesCount: parseInt(attendeesCount, 10) || 1,
+      attendeesCount,
       whatsappNumber,
       whatsappCommunityConcern,
     });
