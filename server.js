@@ -41,6 +41,10 @@ app.get('/api/health', (req, res) => {
   });
 });
 
+app.get('/ping', (req, res) => {
+  res.status(200).send('pong');
+});
+
 // ─── MongoDB Connection ───────────────────────────────────────────────────────
 const MONGO_URI =
   process.env.MONGO_URI ||
